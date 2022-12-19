@@ -1,0 +1,9 @@
+package com.workmotion.statemachine;
+
+public enum EmpEvents {
+	
+	BEGIN_CHECK,COMPLETE_INITIAL_WORK_PERMIT_CHECK,
+	FINISH_WORK_PERMIT_CHECK,FINISH_SECURITY_CHECK,
+	ACTIVATE
+
+}
