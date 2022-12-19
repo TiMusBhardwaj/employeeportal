@@ -20,7 +20,7 @@ import com.workmotion.controller.dto.EmployeeDTO;
 import com.workmotion.controller.dto.EmployeeEventDTO;
 import com.workmotion.model.Employee;
 import com.workmotion.service.EmployeeService;
-import com.workmotion.statemachine.UnAcceptedEventException;
+import com.workmotion.statemachine.exception.UnAcceptedEventException;
 
 @RestController
 public class EmployeeController {

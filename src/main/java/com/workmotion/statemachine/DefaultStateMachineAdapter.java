@@ -7,6 +7,13 @@ import org.springframework.statemachine.persist.StateMachinePersister;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
+/**
+ * @author sumit.b
+ *
+ * @param <S> StateMachine State
+ * @param <E>StateMachine Event
+ * @param <T> Context Id to identify State Machine
+ */
 @RequiredArgsConstructor
 public class DefaultStateMachineAdapter<S, E, T> {
 

@@ -1,4 +1,4 @@
-package com.workmotion.statemachine;
+package com.workmotion.statemachine.exception;
 
 /**
  * 

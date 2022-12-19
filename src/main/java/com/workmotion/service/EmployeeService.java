@@ -10,8 +10,6 @@ import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.statemachine.StateMachine;
-import org.springframework.statemachine.config.StateMachineFactory;
-import org.springframework.statemachine.service.StateMachineService;
 import org.springframework.stereotype.Service;
 
 import com.workmotion.model.Employee;
@@ -19,7 +17,7 @@ import com.workmotion.repository.EmployeeRepository;
 import com.workmotion.statemachine.DefaultStateMachineAdapter;
 import com.workmotion.statemachine.EmpEvents;
 import com.workmotion.statemachine.EmployeeState;
-import com.workmotion.statemachine.UnAcceptedEventException;
+import com.workmotion.statemachine.exception.UnAcceptedEventException;
 
 import lombok.extern.slf4j.Slf4j;
 
