@@ -5,9 +5,12 @@
 Employee management system using Spring State machine.
 
 
-## BUILD Using Maven
+## BUILD Using Maven Inclues test
 
 ```mvn clean package```
+
+## RUN APP
+```./mvnw spring-boot:run```
 
 #### Api DOC Reference is available 
 
