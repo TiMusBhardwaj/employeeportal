@@ -1,8 +1,12 @@
 package com.workmotion.statemachine;
 
-import static com.workmotion.statemachine.EmployeeState.*;
+import static com.workmotion.statemachine.EmployeeState.ACTIVE;
+import static com.workmotion.statemachine.EmployeeState.APPROVED;
+import static com.workmotion.statemachine.EmployeeState.IN_CHECK;
 import static com.workmotion.statemachine.EmployeeState.SECURITY_CHECK_FINISHED;
 import static com.workmotion.statemachine.EmployeeState.SECURITY_CHECK_STARTED;
+import static com.workmotion.statemachine.EmployeeState.WORK_PERMIT_CHECK_FINISHED;
+import static com.workmotion.statemachine.EmployeeState.WORK_PERMIT_CHECK_PENDING_VERIFICATION;
 import static com.workmotion.statemachine.EmployeeState.WORK_PERMIT_CHECK_STARTED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -11,36 +15,32 @@ import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.config.StateMachineFactory;
-import org.springframework.statemachine.service.StateMachineService;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-@ContextConfiguration(classes = { 
-		StateMachineConfig.class })
 @SpringBootTest(classes = { 
 		StateMachineConfig.class})
 @EnableAutoConfiguration
-public class EmployeeStateMachineConfigIntegeartionTest {
+@SuppressWarnings("deprecation")
+public class EmployeeStateMachineConfigIntegrationTest {
+	
 	
 	
 	@Autowired
-	private StateMachineService<EmployeeState, EmpEvents> stateMachineService;
+	private StateMachineFactory<EmployeeState, EmpEvents> factory;
 	
 	@BeforeEach
     public void setUp() {
     	
     }
+	
 	@Test
 	public void testCaseScenario1() {
 		
-		StateMachine<EmployeeState, EmpEvents> sm = stateMachineService.acquireStateMachine("test1");
+		StateMachine<EmployeeState, EmpEvents> sm = factory.getStateMachine("test1");
 		assertTrue( sm.sendEvent(EmpEvents.BEGIN_CHECK));
 		assertEquals(Set.of(IN_CHECK, SECURITY_CHECK_STARTED, WORK_PERMIT_CHECK_STARTED), Set.of(sm.getState().getIds().toArray()));
 		
@@ -57,14 +57,14 @@ public class EmployeeStateMachineConfigIntegeartionTest {
 		assertEquals(Set.of(ACTIVE),  Set.of(sm.getState().getIds().toArray()));
 
 		
-		stateMachineService.releaseStateMachine("test1");
+		sm.stop();
 	}
 	
 	
 	@Test
 	public void testCaseScenario2() {
 		
-		StateMachine<EmployeeState, EmpEvents> sm = stateMachineService.acquireStateMachine("test2", true);
+		StateMachine<EmployeeState, EmpEvents> sm = factory.getStateMachine("test2");
 		
 		assertTrue(sm.sendEvent(EmpEvents.BEGIN_CHECK));
 		assertEquals(Set.of(IN_CHECK, SECURITY_CHECK_STARTED, WORK_PERMIT_CHECK_STARTED), Set.of(sm.getState().getIds().toArray()));
@@ -83,14 +83,14 @@ public class EmployeeStateMachineConfigIntegeartionTest {
 		assertTrue( sm.sendEvent(EmpEvents.ACTIVATE));
 		assertEquals(Set.of(ACTIVE),  Set.of(sm.getState().getIds().toArray()));
 
-		stateMachineService.releaseStateMachine("test2");
+		sm.stop();
 		
 	}
 	
 	@Test
 	public void testCaseScenario3() {
 		
-		StateMachine<EmployeeState, EmpEvents> sm = stateMachineService.acquireStateMachine("test3", true);
+		StateMachine<EmployeeState, EmpEvents> sm = factory.getStateMachine("test3");
 		
 		assertTrue(sm.sendEvent(EmpEvents.BEGIN_CHECK));
 		assertEquals(Set.of(IN_CHECK, SECURITY_CHECK_STARTED, WORK_PERMIT_CHECK_STARTED), Set.of(sm.getState().getIds().toArray()));
@@ -110,7 +110,7 @@ public class EmployeeStateMachineConfigIntegeartionTest {
 		assertTrue( sm.sendEvent(EmpEvents.ACTIVATE));
 		assertEquals(Set.of(ACTIVE),  Set.of(sm.getState().getIds().toArray()));
 
-		stateMachineService.releaseStateMachine("test3");
+		sm.stop();
 		
 	}
 
@@ -119,7 +119,7 @@ public class EmployeeStateMachineConfigIntegeartionTest {
 	@Test
 	public void testCaseScenario4() {
 		
-		StateMachine<EmployeeState, EmpEvents> sm = stateMachineService.acquireStateMachine("test4");
+		StateMachine<EmployeeState, EmpEvents> sm = factory.getStateMachine("test4");
 		assertTrue( sm.sendEvent(EmpEvents.BEGIN_CHECK));
 		assertEquals(Set.of(IN_CHECK, SECURITY_CHECK_STARTED, WORK_PERMIT_CHECK_STARTED), Set.of(sm.getState().getIds().toArray()));
 		
@@ -127,7 +127,7 @@ public class EmployeeStateMachineConfigIntegeartionTest {
 		assertEquals(Set.of(IN_CHECK, SECURITY_CHECK_FINISHED, WORK_PERMIT_CHECK_STARTED),  Set.of(sm.getState().getIds().toArray()));
 		
 		assertTrue(! sm.sendEvent(EmpEvents.ACTIVATE));
-		stateMachineService.releaseStateMachine("test4");
+		sm.stop();
 		
 	}
 	
@@ -135,7 +135,7 @@ public class EmployeeStateMachineConfigIntegeartionTest {
 	@Test
 	public void testCaseScenario5() {
 		
-		StateMachine<EmployeeState, EmpEvents> sm = stateMachineService.acquireStateMachine("test5");
+		StateMachine<EmployeeState, EmpEvents> sm = factory.getStateMachine("test5");
 		assertTrue( sm.sendEvent(EmpEvents.BEGIN_CHECK));
 		assertEquals(Set.of(IN_CHECK, SECURITY_CHECK_STARTED, WORK_PERMIT_CHECK_STARTED), Set.of(sm.getState().getIds().toArray()));
 		
@@ -143,7 +143,7 @@ public class EmployeeStateMachineConfigIntegeartionTest {
 		assertEquals(Set.of(IN_CHECK, SECURITY_CHECK_FINISHED, WORK_PERMIT_CHECK_STARTED),  Set.of(sm.getState().getIds().toArray()));
 		
 		assertTrue(! sm.sendEvent(EmpEvents.FINISH_SECURITY_CHECK));
-		stateMachineService.releaseStateMachine("test5");
+		sm.stop();
 		
 	}
 }

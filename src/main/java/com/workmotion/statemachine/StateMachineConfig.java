@@ -34,7 +34,6 @@ import static com.workmotion.statemachine.EmployeeState.WORK_PERMIT_CHECK_STARTE
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,22 +43,12 @@ import org.springframework.statemachine.config.EnableStateMachineFactory;
 import org.springframework.statemachine.config.StateMachineConfigurerAdapter;
 import org.springframework.statemachine.config.StateMachineFactory;
 import org.springframework.statemachine.config.builders.StateMachineConfigurationConfigurer;
-import org.springframework.statemachine.config.builders.StateMachineModelConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineStateConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineTransitionConfigurer;
-import org.springframework.statemachine.config.model.StateMachineModelFactory;
-import org.springframework.statemachine.data.RepositoryState;
-import org.springframework.statemachine.data.RepositoryStateMachineModelFactory;
-import org.springframework.statemachine.data.RepositoryTransition;
-import org.springframework.statemachine.data.StateRepository;
-import org.springframework.statemachine.data.TransitionRepository;
-import org.springframework.statemachine.data.jpa.JpaPersistingStateMachineInterceptor;
+import org.springframework.statemachine.data.jpa.JpaRepositoryStateMachinePersist;
 import org.springframework.statemachine.data.jpa.JpaStateMachineRepository;
 import org.springframework.statemachine.persist.DefaultStateMachinePersister;
 import org.springframework.statemachine.persist.StateMachinePersister;
-import org.springframework.statemachine.persist.StateMachineRuntimePersister;
-import org.springframework.statemachine.service.DefaultStateMachineService;
-import org.springframework.statemachine.service.StateMachineService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -73,25 +62,7 @@ public class StateMachineConfig {
 		log.info("StateMachineConfig .. init");
 	}
 
-	@Bean
-	public StateMachineRuntimePersister<EmployeeState, EmpEvents, String> stateMachineRuntimePersister(
-			JpaStateMachineRepository jpaStateMachineRepository) {
-		return new JpaPersistingStateMachineInterceptor<>(jpaStateMachineRepository);
-	}
-	
-	
-	@Bean
-	public StateMachinePersister<EmployeeState, EmpEvents, String> stateMachinePersister(StateMachinePersist<EmployeeState, EmpEvents, String> stateMachinePersist) {
-		return new DefaultStateMachinePersister<>(stateMachinePersist);
-	}
 
-	@Bean
-	public StateMachineService<EmployeeState, EmpEvents> stateMachineService(
-			@Qualifier("employeeStateMachineFactory") StateMachineFactory<EmployeeState, EmpEvents> stateMachineFactory,
-			StateMachineRuntimePersister<EmployeeState, EmpEvents, String> stateMachineRuntimePersister) {
-  		return new DefaultStateMachineService<EmployeeState, EmpEvents>(stateMachineFactory, stateMachineRuntimePersister);
-	}
-	
 	
 	@Configuration
 	@EnableStateMachineFactory(name= "employeeStateMachineFactory")
@@ -104,16 +75,13 @@ public class StateMachineConfig {
 			log.info("employeeStateMachineFactory .. init");
 		}
 			
-		@Autowired
-		private StateMachineRuntimePersister<EmployeeState, EmpEvents, String> stateMachineRuntimePersister;
-
 		@Override
 		public void configure(StateMachineConfigurationConfigurer<EmployeeState, EmpEvents> config)
 			throws Exception {
 			config
-				.withPersistence()
+			/*.withPersistence()
 					.runtimePersister(stateMachineRuntimePersister)
-					.and()
+					.and()*/
 			        .withConfiguration()
 			        .autoStartup(true);
 		}
@@ -178,29 +146,26 @@ public class StateMachineConfig {
 			    .event(ACTIVATE);
 		}
 
-		/*
-		 * @Override public void configure(StateMachineModelConfigurer<EmployeeState,
-		 * EmpEvents> model) throws Exception {
-		 * 
-		 * model.withModel().factory(modelFactory());
-		 * 
-		 * }
-		 * 
-		 * @Autowired private StateRepository<? extends RepositoryState>
-		 * stateRepository;
-		 * 
-		 * @Autowired private TransitionRepository<? extends RepositoryTransition>
-		 * transitionRepository;
-		 * 
-		 * 
-		 * @Bean public StateMachineModelFactory modelFactory() {
-		 * 
-		 * StateMachineModelFactory fact = new RepositoryStateMachineModelFactory(
-		 * stateRepository, transitionRepository); return fact; }
-		 */
+		
 				
 	}
 
+
+	@Bean
+    public DefaultStateMachineAdapter<EmployeeState, EmpEvents, String> empStateMachineAdapter(
+    		@Qualifier("employeeStateMachineFactory") StateMachineFactory<EmployeeState, EmpEvents> stateMachineFactory,
+            StateMachinePersister<EmployeeState, EmpEvents, String> persister) {
+        return new DefaultStateMachineAdapter<>(stateMachineFactory, persister);
+    }
 	
+	@Bean
+    public StateMachinePersister<EmployeeState, EmpEvents, String> persister(JpaStateMachineRepository jpaStateMachineRepository) {
+        return new DefaultStateMachinePersister<EmployeeState, EmpEvents, String>(persist(jpaStateMachineRepository));
+    }
+
+    @Bean
+    public StateMachinePersist persist(JpaStateMachineRepository jpaStateMachineRepository) {
+        return new JpaRepositoryStateMachinePersist<EmployeeState, EmpEvents>(jpaStateMachineRepository);
+    }
 
 }

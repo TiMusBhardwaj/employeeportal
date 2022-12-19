@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.workmotion.model.Employee;
 import com.workmotion.repository.EmployeeRepository;
+import com.workmotion.statemachine.DefaultStateMachineAdapter;
 import com.workmotion.statemachine.EmpEvents;
 import com.workmotion.statemachine.EmployeeState;
 import com.workmotion.statemachine.UnAcceptedEventException;
@@ -30,12 +31,9 @@ public class EmployeeService {
 	private EmployeeRepository empRepository;
 	
 	@Autowired
-	private StateMachineFactory<EmployeeState, EmpEvents> employeeStateMachineFactory;
+    private DefaultStateMachineAdapter<EmployeeState, EmpEvents, String> empStateMachineAdapter;
+
 	
-	@Autowired
-	private StateMachineService<EmployeeState, EmpEvents> stateMachineService;
-
-
 	/**
 	 * 
 	 * 1.Create a Employee with unique Id.
@@ -50,9 +48,10 @@ public class EmployeeService {
 	public Employee createEmployee(Employee employee) {
 		
 		Employee emp = empRepository.save(employee);
-		StateMachine<EmployeeState, EmpEvents> sm = employeeStateMachineFactory.getStateMachine(emp.getId());
-		sm.sendEvent(EmpEvents.BEGIN_CHECK);
+		StateMachine<EmployeeState, EmpEvents> sm = empStateMachineAdapter.create(emp.getId());
+		empStateMachineAdapter.persist(sm, emp.getId());
 		emp.setStates(sm.getState().getIds().stream().collect(Collectors.toSet()));
+		sm.stop();
 		return emp;
 	}
 
@@ -70,7 +69,7 @@ public class EmployeeService {
 			throw new NoResultException();
 		}
 		
-		StateMachine<EmployeeState, EmpEvents> sm = stateMachineService.acquireStateMachine(empId, false);
+		StateMachine<EmployeeState, EmpEvents> sm = empStateMachineAdapter.restore(empId);
 		@SuppressWarnings("deprecation")
 		boolean eventSuccessFul = sm.sendEvent(empEvent);
 		Set<EmployeeState> empState = sm.getState().getIds().stream().collect(Collectors.toSet());
@@ -79,7 +78,8 @@ public class EmployeeService {
 					String.format("Employee State : %s, not accepting Event : %s", empState, empEvent));
 		}
 		empOp.filter(emp -> Objects.nonNull(emp.getId())).ifPresent(emp -> emp.setStates(empState));
-		stateMachineService.releaseStateMachine(empId);
+		empStateMachineAdapter.persist(sm, empId);
+		sm.stop();
 		return empOp;
 	}
 
@@ -88,8 +88,6 @@ public class EmployeeService {
 	 * @return
 	 */
 	public Optional<Employee> getEmployee(String employeeId) {
-		
-		Optional<Employee> empOp = empRepository.findById(employeeId);
 		
 		return empRepository.findById(employeeId);
 	}
