@@ -39,9 +39,14 @@ http://localhost:8080/swagger-ui/index.html
 ```
 
 
-#### Api DOC Reference is available 
+#### Docker Build
 
-http://localhost:8080/swagger-ui/index.html
+```sudo docker build --platform=linux/x86_64 -t eportal:1.0 . ```
+
+
+#### Docker Run
+
+```sudo docker run -p 8080:8080 -t eportal:1.0```
 
 
 
