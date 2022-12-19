@@ -5,6 +5,16 @@
 Employee management system using Spring State machine.
 
 
+## BUILD Using Maven
+
+```mvn clean package```
+
+#### Api DOC Reference is available 
+
+http://localhost:8080/swagger-ui/index.html
+
+
+
 ## API Reference
 
 #### Create Employee
