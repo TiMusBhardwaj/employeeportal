@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.workmotion.statemachine;
+package com.workmotion.controller;
 
 import static com.workmotion.statemachine.EmployeeState.ACTIVE;
 import static com.workmotion.statemachine.EmployeeState.APPROVED;
@@ -61,6 +61,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.workmotion.Application;
 import com.workmotion.controller.dto.EmployeeDTO;
 import com.workmotion.controller.dto.EmployeeEventDTO;
+import com.workmotion.statemachine.EmpEvents;
 
 
 
